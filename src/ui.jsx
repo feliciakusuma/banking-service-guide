@@ -117,7 +117,7 @@ export const StepByStepGuide=({steps})=>{const {t,u}=useL();const [current,setCu
   <div className="progress-track"><span style={{width:`${(completed.size/steps.length)*100}%`}}/></div>
   <section className="step-page card"><div className="sh"><span className={`num${isComplete?' done':''}`}>{isComplete?<Check size={22}/>:current+1}</span><div><small>{u('step')} {current+1}</small><h3>{t(step.t)}</h3></div></div><Blocks blocks={step.blocks}/>
    {isComplete&&<div className="step-success"><Check size={18}/>{u('stepCompleted')}</div>}
-   <div className="step-controls"><button className="btn ghost" onClick={()=>setCurrent(current-1)} disabled={current===0}><ChevronLeft size={18}/>{u('previousStep')}</button><button className="btn" onClick={markAndContinue} disabled={isComplete&&isLast}>{isComplete?u('continueStep'):isLast?u('finishStep'):u('markComplete')}</button></div>
+   <div className="step-controls"><button className="btn ghost" onClick={()=>setCurrent(current-1)} disabled={current===0}><ChevronLeft size={18}/>{u('previousStep')}</button><button className="btn" onClick={markAndContinue} disabled={isComplete&&isLast}>{u('continueStep')}</button></div>
    {completed.size===steps.length&&<div className="step-success all-done"><Check size={18}/>{u('allStepsComplete')}</div>}
   </section>
  </div>};
