@@ -16,6 +16,7 @@ export const UI={
  mayPick:L("You may select one or both.","可选择其中一项或两项。")
 };
 const VER={k:'ver'};
+const CARD_VER={k:'ver',excludeMyBcaId:true};
 const verItems=[L("myBCA ID","myBCA ID"),L("Savings account number","储蓄账户号码"),L("Registered email address","注册的电子邮箱"),L("Registered Indonesian mobile phone number","注册的手机号码"),L("Mother's name","母亲姓名")];
 export const VERIFY={
  intro:L("Please write down the following information on the paper provided by our Customer Service Officer (CSO):","请将以下信息写在客户服务专员（CSO）提供的纸上："),
@@ -23,11 +24,11 @@ export const VERIFY={
 const P=(en,zh)=>({k:'p',t:L(en,zh)}),H=(en,zh)=>({k:'h',t:L(en,zh)}),N=(en,zh)=>({k:'note',t:L(en,zh)}),W=(en,zh)=>({k:'warn',t:L(en,zh)});
 const UL=(...i)=>({k:'ul',items:i.map(x=>L(...x))}),OL=(...i)=>({k:'ol',items:i.map(x=>L(...x))}),DOCS=(...i)=>({k:'docs',items:i.map(x=>L(...x))});
 const PASS=["Passport","护照"];
-const cardPage=(title,icon,desc,docs)=>({title,icon,desc,blocks:[H("Required documents","所需材料"),DOCS(PASS,["KITAS/KITAP","KITAS/KITAP 居留许可"],["Tahapan passbook","Tahapan 存折"],...docs),VER,N("Please prepare the required documents and follow the Customer Service Officer's instructions for card replacement.","请准备好所需材料，并按照客户服务专员的指示办理补卡。")]});
+const cardPage=(title,icon,desc,docs)=>({title,icon,desc,blocks:[H("Required documents","所需材料"),DOCS(PASS,["KITAS/KITAP","KITAS/KITAP 居留许可"],["Tahapan passbook","Tahapan 存折"],...docs),CARD_VER,N("Please prepare the required documents and follow the Customer Service Officer's instructions for card replacement.","请准备好所需材料，并按照客户服务专员的指示办理补卡。")]});
 const csoOnly=(title,icon,desc,en,zh)=>({title,icon,desc,blocks:[{k:'info',t:L(en,zh)}]});
 const pending=(title,desc)=>csoOnly(title,'phone',desc,"Please approach our Customer Service Officer for further assistance and guidance regarding this service.","请前往客户服务专员处，获取有关此服务的进一步协助与指引。"); // TODO: replace blocks when procedures are confirmed
 
-const lostBlocks=[H("Required documents","所需材料"),DOCS(PASS),VER];
+const lostBlocks=[H("Required documents","所需材料"),DOCS(PASS),CARD_VER];
 
 export const TREE={subs:{
  account:{title:L("Account Opening","开立账户"),icon:'user-plus',desc:L("Individual and corporate accounts","个人与公司账户"),subs:{
@@ -47,13 +48,13 @@ export const TREE={subs:{
   lost:cardPage(L("Lost Card","卡片遗失"),'card',L("Passport, KITAS/KITAP and Tahapan passbook required","需携带护照"),[]),
   expired:cardPage(L("Expired Card","卡片过期"),'card',L("Passport, KITAS/KITAP, Tahapan passbook and expired card required","需要护照和过期卡"),[["Expired ATM card","过期的 ATM 卡"]]),
   damaged:cardPage(L("Damaged Card","卡片损坏"),'card',L("Passport, KITAS/KITAP, Tahapan passbook and damaged card required","需要护照和损坏的卡"),[["Damaged ATM card","损坏的 ATM 卡"]]),
-  pin:cardPage(L("Forgot PIN","\u5fd8\u8bb0 PIN"),'card',L("Passport, KITAS/KITAP and Tahapan passbook required","\u9700\u643a\u5e26\u62a4\u7167\u3001 KITAS/KITAP \u548c Tahapan \u5b58\u6298"),[]) }},
+  pin:cardPage(L("Forgot PIN","\u5fd8\u8bb0 PIN"),'card',L("Passport, KITAS/KITAP and Tahapan passbook required","\u9700\u643a\u5e26\u62a4\u7167\u3001 KITAS/KITAP \u548c Tahapan \u5b58\u6298"),[['ATM card','\u81ea\u52a8\u53d6\u6b3e\u5361']]) }},
  atm:{title:L("ATM Issues","ATM 卡问题"),icon:'atm',desc:L("Card retained by an ATM","吞卡、交易失败等"),subs:{
   retained:{title:L("ATM Card Retained","ATM 卡被吞"),icon:'atm',desc:L("Card kept by the ATM","卡被 ATM 吞没"),decision:{
     q:L("Was your card issued by BCA?","您的卡是由 BCA 发行的吗？"),yes:L("YES — BCA Card","是 — BCA 卡"),no:L("NO — Foreign Bank Card","否 — 外国银行卡")},subs:{
    bca:{title:L("Lost Card","\u5361\u7247\u9057\u5931"),icon:'card',redirectTo:'/s/card/lost'},
    other:{title:L("Contact Your Issuing Bank","请联系发卡银行"),icon:'alert',cta:false,blocks:[{k:'info',t:L("If your ATM card was issued by another bank and retained by a BCA ATM, please contact or visit your card-issuing bank (your home bank) for further assistance.\n\nBCA cannot directly process the retrieval of cards issued by other banks under this procedure.","如果您的 ATM 卡由其他银行发行并被 BCA ATM 吞没，请联系或前往您的发卡银行（您的本国银行）寻求进一步协助。\n\n根据本流程，BCA 无法直接处理其他银行所发行卡片的取回。")}]}}},
-  blocked:{title:L("ATM Card Blocked","ATM 卡已锁定"),icon:'atm',desc:L("Blocked after entering the wrong PIN three times","连续三次输入错误 PIN 后被锁定"),blocks:[H("Required documents","\u6240\u9700\u6750\u6599"),DOCS(PASS,["KITAS/KITAP","KITAS/KITAP"]),VER]}}},
+  blocked:{title:L("ATM Card Blocked","ATM 卡已锁定"),icon:'atm',desc:L("Blocked after entering the wrong PIN three times","连续三次输入错误 PIN 后被锁定"),blocks:[H("Required documents","\u6240\u9700\u6750\u6599"),DOCS(PASS,["KITAS/KITAP","KITAS/KITAP"],["Blocked ATM card","被锁定的 ATM 卡"]),VER]}}},
  mybca:{title:L("myBCA Assistance","myBCA 协助"),icon:'phone',desc:L("Unblock myBCA or reset your password","解锁 myBCA 或重置密码"),subs:{
   unblock:{title:L("Unblock myBCA","\u89e3\u9501 myBCA"),icon:'phone',desc:L("Required documents","\u6240\u9700\u6750\u6599"),blocks:[H("Required documents","\u6240\u9700\u6750\u6599"),DOCS(PASS,["KITAS/KITAP","KITAS/KITAP"]),N("Please ensure you have mobile phone credit (pulsa) to receive the OTP.","\u8bf7\u786e\u4fdd\u624b\u673a\u6709\u8db3\u591f\u8bdd\u8d39\u4ee5\u63a5\u6536 OTP \u9a8c\u8bc1\u7801\u3002"),VER,N("Please prepare the required documents and follow the Customer Service Officer's instructions to unblock myBCA.","\u8bf7\u51c6\u5907\u597d\u6240\u9700\u6587\u4ef6\uff0c\u5e76\u6309\u7167\u5ba2\u6237\u670d\u52a1\u4e13\u5458\u7684\u6307\u793a\u89e3\u9501 myBCA\u3002")]},
   forgot:{title:L("Forgot Password","\u5fd8\u8bb0\u5bc6\u7801"),icon:'phone',desc:L("Try your remembered password","\u5c1d\u8bd5\u60a8\u8bb0\u5f97\u7684\u5bc6\u7801"),blocks:[H("Try to log in","\u5c1d\u8bd5\u767b\u5f55"),OL(["Open the myBCA app.","\u6253\u5f00 myBCA \u5e94\u7528\u3002"],["Enter the password you remember. You may attempt to log in up to 3 times.","\u8f93\u5165\u60a8\u8bb0\u5f97\u7684\u5bc6\u7801\uff0c\u6700\u591a\u53ef\u5c1d\u8bd5\u767b\u5f55 3 \u6b21\u3002"]),N("If all 3 attempts fail, myBCA will be blocked. Select Continue to view the steps to unblock it.","\u5982\u679c 3 \u6b21\u5c1d\u8bd5\u5747\u5931\u8d25\uff0cmyBCA \u5c06\u88ab\u9501\u5b9a\u3002\u70b9\u51fb Continue \u67e5\u770b\u89e3\u9501\u6b65\u9aa4\u3002")],extra:{to:'/s/mybca/unblock',label:L("Continue","\u7ee7\u7eed")}},}},
