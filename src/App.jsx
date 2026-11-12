@@ -15,6 +15,7 @@ function Menu(){const {t,u}=useL();
 function Service(){const {t}=useL();const nav=useNavigate();const p=useParams()['*'];
  let node=TREE,path='/s',crumbs=[],parent='/menu';
  for(const s of p.split('/').filter(Boolean)){node=node?.subs?.[s];if(!node)return <Navigate to="/menu" replace/>;parent=path==='/s'?'/menu':path;path+='/'+s;crumbs.push({label:t(node.title),to:path});}
+ if(node.redirectTo)return <Navigate to={node.redirectTo} replace/>;
  return <><Breadcrumb items={crumbs}/>
   <div className="title"><Icon name={node.icon} size={26}/><h1>{t(node.title)}</h1></div>
   {node.decision&&<InformationCard title={t(node.decision.q)}><button className="btn big" onClick={()=>nav(path+'/bca')}>{t(node.decision.yes)}</button><button className="btn big alt" onClick={()=>nav(path+'/other')}>{t(node.decision.no)}</button></InformationCard>}
