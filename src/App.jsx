@@ -18,7 +18,7 @@ function Service(){const {t}=useL();const nav=useNavigate();const p=useParams()[
  if(node.redirectTo)return <Navigate to={node.redirectTo} replace/>;
  return <><Breadcrumb items={crumbs}/>
   <div className="title"><Icon name={node.icon} size={26}/><h1>{t(node.title)}</h1></div>
-  {node.decision&&<InformationCard title={t(node.decision.q)}><button className="btn big" onClick={()=>nav(path+'/bca')}>{t(node.decision.yes)}</button><button className="btn big alt" onClick={()=>nav(path+'/other')}>{t(node.decision.no)}</button></InformationCard>}
+  {node.decision&&<InformationCard title={t(node.decision.q)}><div className="decision-actions"><button className="btn" onClick={()=>nav(path+'/bca')}>{t(node.decision.yes)}</button><button className="btn alt" onClick={()=>nav(path+'/other')}>{t(node.decision.no)}</button></div></InformationCard>}
   {node.subs&&!node.decision&&<div className="list">{Object.entries(node.subs).map(([k,n])=><SubcategoryCard key={k} to={path+'/'+k} icon={n.icon} title={t(n.title)} desc={t(n.desc)}/>)}</div>}
   {node.steps&&<StepByStepGuide steps={node.steps}/>}
   {node.blocks&&<InformationCard><Blocks blocks={node.blocks}/></InformationCard>}
