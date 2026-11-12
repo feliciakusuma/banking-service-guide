@@ -108,7 +108,7 @@ export function Blocks({blocks,selection,setSelection}){const {t,u}=useL();
   case 'check':return <CheckGroup key={i} items={b.items} hint={b.hint}/>;
   case 'radio':return <RadioGroup key={i} items={b.items}/>;
   case 'accountOptions':return <AccountProductSelector key={i} selection={selection||{}} setSelection={setSelection}/>;
-  case 'ver':return <div key={i} className="ver"><h4>{u('verify')}</h4><p>{t(VERIFY.intro)}</p><ol className="ol">{VERIFY.items.map((x,j)=><li key={j}>{t(x)}</li>)}</ol><div className="note">{t(VERIFY.note)}</div></div>;
+  case 'ver':{const items=b.excludeMyBcaId?VERIFY.items.filter(x=>x.en!=='myBCA ID'):VERIFY.items;return <div key={i} className='ver'><h4>{u('verify')}</h4><p>{t(VERIFY.intro)}</p><ol className='ol'>{items.map((x,j)=><li key={j}>{t(x)}</li>)}</ol><div className='note'>{t(VERIFY.note)}</div></div>}
   default:return null}})}
 export const StepByStepGuide=({steps})=>{const {t,u}=useL();const navigate=useNavigate();const [current,setCurrent]=useState(0);const [completed,setCompleted]=useState(()=>new Set());const [selection,setSelection]=useState({});
  const step=steps[current];const isComplete=completed.has(current);const isLast=current===steps.length-1;
