@@ -35,26 +35,26 @@ export const WarningNotice=({children})=><div className="warn"><ShieldCheck size
 export const DocumentChecklist=({items})=>{const {t}=useL();return <ul className="checklist">{items.map((i,k)=><li key={k}><span className="ck"><Check size={14}/></span>{t(i)}</li>)}</ul>};
 function CheckGroup({items,hint}){const {t}=useL();const [s,set]=useState({}); // display-only, nothing stored or sent
  return <div>{items.map((i,k)=><label key={k} className="opt"><input type="checkbox" checked={!!s[k]} onChange={e=>set({...s,[k]:e.target.checked})}/><span>{t(i)}</span></label>)}<p className="hint">{t(hint)}</p></div>}
-function RadioGroup({items}){const {t}=useL();const [selected,setSelected]=useState('');
- return <div>{items.map((item,index)=><label key={index} className="opt"><input type="radio" name="card-name-choice" value={index} checked={selected===String(index)} onChange={()=>setSelected(String(index))}/><span>{t(item)}</span></label>)}</div>}
+function RadioGroup({items,selected:controlled,onChange}){const {t}=useL();const [local,setLocal]=useState('');const selected=controlled??local;
+ return <div>{items.map((item,index)=><label key={index} className="opt"><input type="radio" name="card-name-choice" value={index} checked={selected===String(index)} onChange={()=>controlled===undefined?setLocal(String(index)):onChange?.(String(index))}/><span>{t(item)}</span></label>)}</div>}
 function CheckOptions({options,selected,onChange}){const {t}=useL();
  return <div>{options.map(option=><label key={option.key} className="opt"><input type="checkbox" checked={!!selected[option.key]} onChange={()=>onChange(option.key)}/><span>{t(option.label)}</span></label>)}<p className="hint">{t({en:'Select all that apply',zh:'可多选'})}</p></div>}
-function AccountProductSelector(){const {t}=useL();const [products,setProducts]=useState({});const [cards,setCards]=useState({});const [currencies,setCurrencies]=useState({});
+function AccountProductSelector({selection,setSelection}){const {t}=useL();const products=selection.products||{};const cards=selection.cards||{};const currencies=selection.currencies||{};
  const productOptions=[{key:'tahapan',label:{en:'Tahapan',zh:'Tahapan'}},{key:'xpresi',label:{en:'Tahapan Xpresi',zh:'Tahapan Xpresi'}},{key:'dollar',label:{en:'BCA Dollar',zh:'BCA Dollar'}}];
  const cardOptions=[{key:'blue',label:{en:'Blue',zh:'Blue 蓝卡'}},{key:'gold',label:{en:'Gold',zh:'Gold 金卡'}},{key:'platinum',label:{en:'Platinum',zh:'Platinum 白金卡'}}];
  const currencyOptions=[{key:'usd',label:{en:'USD',zh:'USD 美元'}},{key:'sgd',label:{en:'SGD',zh:'SGD 新加坡元'}}];
- const toggle=(setter,key)=>setter(prev=>({...prev,[key]:!prev[key]}));
- const toggleProduct=key=>{const enabled=!products[key];setProducts(prev=>({...prev,[key]:enabled}));if(!enabled&&key==='tahapan')setCards({});if(!enabled&&key==='dollar')setCurrencies({})};
+ const toggle=(group,key)=>setSelection(prev=>({...prev,[group]:{...(prev[group]||{}),[key]:!(prev[group]||{})[key]}}));
+ const toggleProduct=key=>{const enabled=!products[key];setSelection(prev=>({...prev,products:{...(prev.products||{}),[key]:enabled},...(!enabled&&key==='tahapan'?{cards:{}}:{}),...(!enabled&&key==='dollar'?{currencies:{}}:{})}))};
  const hasCard=Object.values(cards).some(Boolean);
  return <div className="account-options">
   <h4>{t({en:'Account products',zh:'账户产品'})}</h4>
   <CheckOptions options={productOptions} selected={products} onChange={toggleProduct}/>
   {products.tahapan&&<section className="conditional-options"><h4>{t({en:'Paspor BCA debit card options (for Tahapan ONLY)',zh:'Paspor BCA 借记卡选项（仅适用于 Tahapan）'})}</h4>
-   <CheckOptions options={cardOptions} selected={cards} onChange={key=>toggle(setCards,key)}/>
-   {hasCard&&<><h4>{t({en:'Would you like your name printed on the card?',zh:'您希望在卡片上印上姓名吗？'})}</h4><RadioGroup items={[{en:'Yes, print my name',zh:'是，卡片上印姓名'},{en:'No, no name',zh:'否，不印姓名'}]}/>
-    <div className="note">{t({en:'The card without a name is issued immediately. A card with your name will be ready in 7 business days; please return to the branch to collect it.',zh:'不印姓名的卡片可立即领取。印有姓名的卡片将在 7 个工作日后准备好，请返回网点领取。'})}</div></>}
+   <CheckOptions options={cardOptions} selected={cards} onChange={key=>toggle('cards',key)}/>
+   {hasCard&&<><h4>{t({en:'Choose your card format',zh:'选择卡片类型'})}</h4><RadioGroup selected={selection.cardName||''} onChange={value=>setSelection(prev=>({...prev,cardName:value}))} items={[{en:'Conventional card — print my name',zh:'常规卡 — 印姓名'},{en:'Instant card — no name printed',zh:'即时卡 — 不印姓名'}]}/>
+    <div className="note">{t({en:'An instant card without a printed name is issued immediately. A conventional card with your name printed is generally ready in 7 business days; please return to the branch to collect it.',zh:'不印姓名的即时卡可立即领取。印有姓名的常规卡通常将在 7 个工作日内准备好，请返回网点领取。'})}</div></>}
   </section>}
-  {products.dollar&&<section className="conditional-options"><h4>{t({en:'BCA Dollar currency',zh:'BCA Dollar 账户币种'})}</h4><CheckOptions options={currencyOptions} selected={currencies} onChange={key=>toggle(setCurrencies,key)}/></section>}
+  {products.dollar&&<section className="conditional-options"><h4>{t({en:'BCA Dollar currency',zh:'BCA Dollar 账户币种'})}</h4><CheckOptions options={currencyOptions} selected={currencies} onChange={key=>toggle('currencies',key)}/><div className="note">{t({en:'BCA Dollar cards are issued in conventional form and are generally ready within 7 business days. Please return to the branch to collect your card.',zh:'BCA Dollar 卡以常规卡形式发行，通常将在 7 个工作日内准备就绪。请返回网点领取。'})}</div></section>}
  </div>;
 }
 const Txt=({s})=>s.split('\n\n').map((x,i)=><p key={i}>{x}</p>);
@@ -93,7 +93,7 @@ function CardDetails(){const {lang}=useL();const zh=lang==='zh';const label=(en,
  </div></details>;
 }
 
-export function Blocks({blocks}){const {t,u}=useL();
+export function Blocks({blocks,selection,setSelection}){const {t,u}=useL();
  return blocks.map((b,i)=>{switch(b.k){
   case 'p':return <Txt key={i} s={t(b.t)}/>;
   case 'h':return <h4 key={i}>{t(b.t)}</h4>;
@@ -103,21 +103,22 @@ export function Blocks({blocks}){const {t,u}=useL();
   case 'note':return <div key={i} className="note">{t(b.t)}</div>;
   case 'warn':return <WarningNotice key={i}>{t(b.t)}</WarningNotice>;
   case 'cardDetails':return <CardDetails key={i}/>;
+  case 'cardFees':{const s=selection||{};const rows=[];if(s.cards?.blue)rows.push(['Paspor Blue','Rp500,000','Rp15,000 (Mastercard)']);if(s.cards?.gold)rows.push(['Paspor Gold','Rp500,000','Rp17,000 (Mastercard)']);if(s.cards?.platinum)rows.push(['Paspor Platinum','Rp500,000','Rp20,000 (Mastercard)']);if(s.products?.xpresi)rows.push(['Tahapan Xpresi','Rp50,000','Rp10,000']);if(s.currencies?.usd)rows.push(['BCA Dollar (USD)','USD 100','USD 1']);if(s.currencies?.sgd)rows.push(['BCA Dollar (SGD)','SGD 200','SGD 2']);return <section><h4>{t({en:'Based on your selections',zh:'根据您的选择'})}</h4>{rows.length?<div className="table-wrap"><table><thead><tr><th>{t({en:'Account / card',zh:'账户 / 卡片'})}</th><th>{t({en:'Minimum initial deposit',zh:'最低初始存款'})}</th><th>{t({en:'Monthly administration fee',zh:'每月管理费'})}</th></tr></thead><tbody>{rows.map(([a,b,c])=><tr key={a}><th scope="row">{a}</th><td>{b}</td><td>{c}</td></tr>)}</tbody></table></div>:<p>{t({en:'No selections carried over. Return to Step 3 to select products or cards.',zh:'没有带入选择，请返回第 3 步选择账户或卡片。'})}</p>}</section>}
   case 'info':return <Txt key={i} s={t(b.t)}/>;
   case 'check':return <CheckGroup key={i} items={b.items} hint={b.hint}/>;
   case 'radio':return <RadioGroup key={i} items={b.items}/>;
-  case 'accountOptions':return <AccountProductSelector key={i}/>;
+  case 'accountOptions':return <AccountProductSelector key={i} selection={selection||{}} setSelection={setSelection}/>;
   case 'ver':return <div key={i} className="ver"><h4>{u('verify')}</h4><p>{t(VERIFY.intro)}</p><ol className="ol">{VERIFY.items.map((x,j)=><li key={j}>{t(x)}</li>)}</ol><div className="note">{t(VERIFY.note)}</div></div>;
   default:return null}})}
-export const StepByStepGuide=({steps})=>{const {t,u}=useL();const [current,setCurrent]=useState(0);const [completed,setCompleted]=useState(()=>new Set());
+export const StepByStepGuide=({steps})=>{const {t,u}=useL();const navigate=useNavigate();const [current,setCurrent]=useState(0);const [completed,setCompleted]=useState(()=>new Set());const [selection,setSelection]=useState({});
  const step=steps[current];const isComplete=completed.has(current);const isLast=current===steps.length-1;
- const markAndContinue=()=>{setCompleted(prev=>new Set(prev).add(current));if(!isLast)setCurrent(current+1)};
+ const markAndContinue=()=>{setCompleted(prev=>new Set(prev).add(current));if(!isLast)setCurrent(current+1);else navigate('/menu')};
  return <div className="steps">
   <div className="step-progress"><span>{u('step')} {current+1} {u('stepOf')} {steps.length}</span><span>{completed.size}/{steps.length}</span></div>
   <div className="progress-track"><span style={{width:`${(completed.size/steps.length)*100}%`}}/></div>
-  <section className="step-page card"><div className="sh"><span className={`num${isComplete?' done':''}`}>{isComplete?<Check size={22}/>:current+1}</span><div><small>{u('step')} {current+1}</small><h3>{t(step.t)}</h3></div></div><Blocks blocks={step.blocks}/>
+  <section className="step-page card"><div className="sh"><span className={`num${isComplete?' done':''}`}>{isComplete?<Check size={22}/>:current+1}</span><div><small>{u('step')} {current+1}</small><h3>{t(step.t)}</h3></div></div><Blocks blocks={step.blocks} selection={selection} setSelection={setSelection}/>
    {isComplete&&<div className="step-success"><Check size={18}/>{u('stepCompleted')}</div>}
-   <div className="step-controls"><button className="btn ghost" onClick={()=>setCurrent(current-1)} disabled={current===0}><ChevronLeft size={18}/>{u('previousStep')}</button><button className="btn" onClick={markAndContinue} disabled={isComplete&&isLast}>{u('continueStep')}</button></div>
+   <div className="step-controls"><button className="btn ghost" onClick={()=>setCurrent(current-1)} disabled={current===0}><ChevronLeft size={18}/>{u('previousStep')}</button><button className="btn" onClick={markAndContinue} disabled={isComplete&&isLast}>{u(isLast?'finishGuide':'continueStep')}</button></div>
    {completed.size===steps.length&&<div className="step-success all-done"><Check size={18}/>{u('allStepsComplete')}</div>}
   </section>
  </div>};
